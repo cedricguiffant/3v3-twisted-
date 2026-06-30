@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f82b52319ed78284cb2dae050d480b7c, type: 3}
+  m_Name: AB_Lirael_Z
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.Lirael.Lirael_Z_PasEthere
+  DisplayName: "Pas \xC9th\xE9r\xE9"
+  Description: 
+  Icon: {fileID: 0}
+  Slot: 2
+  Targeting: 1
+  Range: 4.5
+  MaxRank: 5
+  CooldownByRank:
+  - 8
+  - 7.5
+  - 7
+  - 6.5
+  - 6
+  ManaCostByRank:
+  - 50
+  - 55
+  - 60
+  - 65
+  - 70
+  CastTime: 0.1
+  CanMoveWhileCasting: 0
+  DashDistance: 4.5
+  DashSpeed: 26

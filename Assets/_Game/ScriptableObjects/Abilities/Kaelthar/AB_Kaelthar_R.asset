@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 346a5196f6b608a4c804d14c5f8d0f64, type: 3}
+  m_Name: AB_Kaelthar_R
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.Kaelthar.Kaelthar_R_JugementDuVide
+  DisplayName: Jugement du Vide
+  Description: 
+  Icon: {fileID: 0}
+  Slot: 4
+  Targeting: 1
+  Range: 9
+  MaxRank: 3
+  CooldownByRank:
+  - 8
+  - 7.5
+  - 7
+  - 6.5
+  - 6
+  ManaCostByRank:
+  - 50
+  - 55
+  - 60
+  - 65
+  - 70
+  CastTime: 0.1
+  CanMoveWhileCasting: 0
+  ExplosionRadius: 4
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  DamageByRank:
+  - 200
+  - 325
+  - 450
+  ApRatio: 0.8
+  StunByRank:
+  - 1
+  - 1.25
+  - 1.5

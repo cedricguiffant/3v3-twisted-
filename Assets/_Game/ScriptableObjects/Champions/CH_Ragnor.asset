@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 748b9295a1594d742b35f4eac8f9612f, type: 3}
+  m_Name: CH_Ragnor
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.ChampionData
+  DisplayName: Ragnor
+  Lore: 
+  Role: 2
+  Portrait: {fileID: 0}
+  ModelPrefab: {fileID: 0}
+  BaseStats:
+  - Stat: 0
+    BaseValue: 1100
+    PerLevel: 85
+  - Stat: 1
+    BaseValue: 7
+    PerLevel: 0.6
+  - Stat: 2
+    BaseValue: 34
+    PerLevel: 3.5
+  - Stat: 3
+    BaseValue: 30
+    PerLevel: 1.2
+  - Stat: 4
+    BaseValue: 300
+    PerLevel: 35
+  - Stat: 5
+    BaseValue: 8
+    PerLevel: 0.6
+  - Stat: 6
+    BaseValue: 72
+    PerLevel: 4
+  - Stat: 8
+    BaseValue: 0.68
+    PerLevel: 0
+  - Stat: 13
+    BaseValue: 6
+    PerLevel: 0
+  - Stat: 10
+    BaseValue: 2
+    PerLevel: 0
+  Passive: {fileID: 11400000, guid: 31a4e57474c0a614f83b922f47691ea7, type: 2}
+  Q: {fileID: 11400000, guid: 1af698c249343034a8356d5e1fd08779, type: 2}
+  Z: {fileID: 11400000, guid: 461ee7107cf5d994b9983f55c1ce62d8, type: 2}
+  E: {fileID: 11400000, guid: 0d86e1c062c3bed428d0a6c48edbc085, type: 2}
+  R: {fileID: 11400000, guid: 673a6a6d8afe44c49a64821836506eef, type: 2}

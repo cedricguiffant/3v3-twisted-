@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18feb2531e3a8714885e767e30352d24, type: 3}
+  m_Name: AB_Vexor_Q
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.Vexor.Vexor_Q_LameFantome
+  DisplayName: "Lame Fant\xF4me"
+  Description: 
+  Icon: {fileID: 0}
+  Slot: 1
+  Targeting: 1
+  Range: 8
+  MaxRank: 5
+  CooldownByRank:
+  - 8
+  - 7.5
+  - 7
+  - 6.5
+  - 6
+  ManaCostByRank:
+  - 50
+  - 55
+  - 60
+  - 65
+  - 70
+  CastTime: 0.1
+  CanMoveWhileCasting: 0
+  ProjectileSpeed: 26
+  ProjectileRadius: 0.45
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  BaseDamageByRank:
+  - 65
+  - 100
+  - 135
+  - 170
+  - 205
+  AdRatio: 0.7
+  SlowAmount: 0.3
+  SlowDuration: 1.5

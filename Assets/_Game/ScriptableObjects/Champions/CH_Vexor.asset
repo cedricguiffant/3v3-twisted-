@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 748b9295a1594d742b35f4eac8f9612f, type: 3}
+  m_Name: CH_Vexor
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.ChampionData
+  DisplayName: Vexor
+  Lore: 
+  Role: 5
+  Portrait: {fileID: 0}
+  ModelPrefab: {fileID: 0}
+  BaseStats:
+  - Stat: 0
+    BaseValue: 920
+    PerLevel: 72
+  - Stat: 1
+    BaseValue: 6
+    PerLevel: 0.5
+  - Stat: 2
+    BaseValue: 28
+    PerLevel: 3.2
+  - Stat: 3
+    BaseValue: 30
+    PerLevel: 1.2
+  - Stat: 4
+    BaseValue: 300
+    PerLevel: 35
+  - Stat: 5
+    BaseValue: 8
+    PerLevel: 0.6
+  - Stat: 6
+    BaseValue: 68
+    PerLevel: 3.5
+  - Stat: 8
+    BaseValue: 0.68
+    PerLevel: 0.02
+  - Stat: 13
+    BaseValue: 6.2
+    PerLevel: 0
+  - Stat: 10
+    BaseValue: 2
+    PerLevel: 0
+  Passive: {fileID: 11400000, guid: b2574ed1aa8b12441b1ada371ccc500e, type: 2}
+  Q: {fileID: 11400000, guid: 12b65d106557cf341b1f3eb2808a8762, type: 2}
+  Z: {fileID: 11400000, guid: abd8cc33d951b2442be7c622ba5c2c05, type: 2}
+  E: {fileID: 11400000, guid: a64bed03a4593aa46b4c8397fcc183fb, type: 2}
+  R: {fileID: 11400000, guid: b6e4a63c284e5dd41a654a149ed45e2d, type: 2}

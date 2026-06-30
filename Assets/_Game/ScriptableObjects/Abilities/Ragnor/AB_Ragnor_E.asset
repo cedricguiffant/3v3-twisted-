@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf5abd9161e9a424da4264858d1222cf, type: 3}
+  m_Name: AB_Ragnor_E
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.Ragnor.Ragnor_E_ChargeEnflammee
+  DisplayName: "Charge Enflamm\xE9e"
+  Description: 
+  Icon: {fileID: 0}
+  Slot: 3
+  Targeting: 1
+  Range: 6
+  MaxRank: 5
+  CooldownByRank:
+  - 8
+  - 7.5
+  - 7
+  - 6.5
+  - 6
+  ManaCostByRank:
+  - 50
+  - 55
+  - 60
+  - 65
+  - 70
+  CastTime: 0.1
+  CanMoveWhileCasting: 0
+  DashDistance: 6
+  DashSpeed: 24
+  ImpactRadius: 2.5
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  BaseDamageByRank:
+  - 50
+  - 80
+  - 110
+  - 140
+  - 170
+  AdRatio: 0.5
+  StunByRank:
+  - 0.6
+  - 0.8
+  - 1
+  - 1.2
+  - 1.4

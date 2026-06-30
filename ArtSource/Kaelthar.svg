@@ -1,0 +1,141 @@
+<svg width="100%" viewBox="0 0 680 880" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Kaelthar, colossal void knight concept portrait</title>
+<desc>A towering faceless armored knight in dark purple-black armor with glowing violet fractures, a cracked soul glowing in the chest, two narrow white-violet eye slits, a massive abyssal anchor weapon fused to the right arm, broken chains and floating anchors orbiting the shoulders, a tattered void cape, and a purple-cyan energy aura over corrupted ground.</desc>
+<defs>
+<radialGradient id="aura" cx="50%" cy="42%" r="58%">
+<stop offset="0%" stop-color="#4c1d95" stop-opacity="0.65"/>
+<stop offset="45%" stop-color="#2a0f4d" stop-opacity="0.35"/>
+<stop offset="100%" stop-color="#0a0612" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="auraCyan" cx="50%" cy="55%" r="55%">
+<stop offset="40%" stop-color="#0e7490" stop-opacity="0"/>
+<stop offset="78%" stop-color="#22d3ee" stop-opacity="0.18"/>
+<stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="soul" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="#fdf4ff" stop-opacity="1"/>
+<stop offset="35%" stop-color="#d8b4fe" stop-opacity="0.95"/>
+<stop offset="70%" stop-color="#a855f7" stop-opacity="0.6"/>
+<stop offset="100%" stop-color="#7e22ce" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="eye" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="#fdf4ff"/>
+<stop offset="55%" stop-color="#c084fc"/>
+<stop offset="100%" stop-color="#7e22ce" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="mist" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="#a855f7" stop-opacity="0.55"/>
+<stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="cape" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#2a1547"/>
+<stop offset="100%" stop-color="#0d0618"/>
+</linearGradient>
+<linearGradient id="armorV" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#3a2356"/>
+<stop offset="100%" stop-color="#150d22"/>
+</linearGradient>
+</defs>
+
+<rect x="0" y="0" width="680" height="880" fill="#0a0612"/>
+<ellipse cx="340" cy="380" rx="330" ry="380" fill="url(#aura)"/>
+<ellipse cx="340" cy="430" rx="300" ry="330" fill="url(#auraCyan)"/>
+
+<rect x="0" y="752" width="680" height="128" fill="#0c0814"/>
+<path d="M40 770 L300 742 L560 778 L300 752 Z" fill="#1a1030" opacity="0.6"/>
+<path d="M120 800 L250 760 L300 752 L210 812 Z" fill="#150b26" opacity="0.7"/>
+<path d="M70 860 L300 754 L640 858" fill="none" stroke="#7e22ce" stroke-width="1.5" opacity="0.5"/>
+<path d="M300 754 L240 880 M300 754 L370 880 M300 754 L150 870 M300 754 L470 868" stroke="#a855f7" stroke-width="1.2" opacity="0.45"/>
+
+<path d="M250 250 L150 330 L120 560 L185 720 L235 720 L210 470 L270 320 Z" fill="url(#cape)" opacity="0.92"/>
+<path d="M430 250 L545 330 L575 560 L505 730 L450 720 L470 470 L415 320 Z" fill="url(#cape)" opacity="0.92"/>
+<path d="M150 560 L120 560 L138 615 L168 590 Z M575 560 L545 560 L540 620 L568 600 Z M505 730 L470 700 L494 758 Z M185 720 L222 692 L205 760 Z" fill="#0d0618"/>
+
+<ellipse cx="222" cy="252" rx="20" ry="20" fill="none" stroke="#3a2d4d" stroke-width="6"/>
+<ellipse cx="248" cy="290" rx="16" ry="16" fill="none" stroke="#46365e" stroke-width="6"/>
+<ellipse cx="455" cy="262" rx="18" ry="18" fill="none" stroke="#3a2d4d" stroke-width="6"/>
+<ellipse cx="486" cy="300" rx="14" ry="14" fill="none" stroke="#46365e" stroke-width="6"/>
+
+<g stroke="#5b21b6" stroke-width="2" fill="#0c0913">
+<path d="M150 150 L168 138 L182 156 L168 178 L150 172 L142 158 Z"/>
+<circle cx="166" cy="158" r="5" fill="none" stroke="#a855f7" stroke-width="2"/>
+<path d="M520 120 L536 110 L548 128 L534 148 L518 142 L512 128 Z"/>
+<circle cx="532" cy="129" r="4" fill="none" stroke="#a855f7" stroke-width="2"/>
+<path d="M470 150 L482 142 L492 158 L480 174 L466 168 Z"/>
+</g>
+
+<path d="M286 540 L268 560 L262 712 L286 760 L322 760 L330 600 L330 540 Z" fill="url(#armorV)" stroke="#150d22" stroke-width="2"/>
+<path d="M394 540 L412 560 L420 712 L398 760 L356 760 L350 600 L350 540 Z" fill="url(#armorV)" stroke="#150d22" stroke-width="2"/>
+<path d="M268 612 L330 612 L322 648 L272 648 Z" fill="#2c1a42" stroke="#4a2d6b" stroke-width="1.5"/>
+<path d="M412 612 L350 612 L356 648 L416 648 Z" fill="#2c1a42" stroke="#4a2d6b" stroke-width="1.5"/>
+<path d="M286 700 L322 700 M398 700 L356 700" stroke="#a855f7" stroke-width="2" opacity="0.7"/>
+<ellipse cx="276" cy="690" rx="6" ry="6" fill="none" stroke="#3a2d4d" stroke-width="4"/>
+<ellipse cx="288" cy="708" rx="6" ry="6" fill="none" stroke="#3a2d4d" stroke-width="4"/>
+
+<path d="M268 470 L262 548 L420 548 L412 470 L380 452 L300 452 Z" fill="#1f1330" stroke="#150d22" stroke-width="2"/>
+<path d="M286 470 L300 540 L380 540 L394 470 Z" fill="#150d22"/>
+<path d="M300 490 L340 540 L380 490 L370 472 L310 472 Z" fill="#2c1a42" stroke="#4a2d6b" stroke-width="1.5"/>
+<path d="M340 472 L340 540 M312 500 L340 524 L368 500" stroke="#a855f7" stroke-width="1.5" opacity="0.65"/>
+
+<path d="M255 260 L300 246 L380 246 L425 260 L432 470 L412 470 L300 470 L268 470 Z" fill="url(#armorV)" stroke="#120a1f" stroke-width="2"/>
+<path d="M268 270 L412 270 L420 380 L392 460 L288 460 L260 380 Z" fill="#251433"/>
+<path d="M288 300 L392 300 L398 360 L382 420 L298 420 L282 360 Z" fill="#1a1026" stroke="#3a2356" stroke-width="1.5"/>
+<path d="M300 282 L260 380 M380 282 L420 380 M278 330 L300 282 L380 282 L402 330" fill="none" stroke="#c084fc" stroke-width="2.2" opacity="0.9"/>
+<path d="M300 282 L260 380 M380 282 L420 380" fill="none" stroke="#7e22ce" stroke-width="6" opacity="0.3"/>
+<path d="M312 430 L300 470 M368 430 L380 470 M340 422 L340 470" stroke="#a855f7" stroke-width="1.6" opacity="0.7"/>
+
+<ellipse cx="340" cy="362" rx="72" ry="78" fill="url(#soul)"/>
+<path d="M340 300 L322 350 L300 358 L326 372 L320 412 L344 378 L378 398 L356 360 L382 344 L348 348 Z" fill="#fdf4ff" opacity="0.92"/>
+<circle cx="340" cy="362" r="14" fill="#ffffff"/>
+
+<g stroke="#120a1f" stroke-width="2">
+<path d="M150 268 L255 250 L262 300 L246 372 L188 392 L150 360 L138 300 Z" fill="url(#armorV)"/>
+<path d="M530 268 L425 250 L418 300 L434 372 L492 392 L530 360 L542 300 Z" fill="url(#armorV)"/>
+</g>
+<path d="M168 282 L240 268 L246 320 L210 358 L172 340 L158 300 Z" fill="#2c1a42"/>
+<path d="M512 282 L440 268 L434 320 L470 358 L508 340 L522 300 Z" fill="#2c1a42"/>
+<path d="M150 268 L160 248 L176 268 Z M196 256 L208 240 L222 260 Z M242 252 L255 250 L256 272 Z" fill="#150d22" stroke="#4a2d6b" stroke-width="1.5"/>
+<path d="M530 268 L520 248 L504 268 Z M484 256 L472 240 L458 260 Z M438 252 L425 250 L424 272 Z" fill="#150d22" stroke="#4a2d6b" stroke-width="1.5"/>
+<path d="M176 290 L232 280 M512 290 L456 280" stroke="#c084fc" stroke-width="2" opacity="0.85"/>
+
+<circle cx="168" cy="360" r="14" fill="url(#mist)"/>
+<circle cx="180" cy="330" r="9" fill="url(#mist)"/>
+<circle cx="512" cy="362" r="13" fill="url(#mist)"/>
+<circle cx="500" cy="332" r="8" fill="url(#mist)"/>
+<circle cx="300" cy="250" r="10" fill="url(#mist)"/>
+<circle cx="384" cy="252" r="9" fill="url(#mist)"/>
+
+<path d="M430 372 L500 392 L516 452 L498 520 L452 520 L444 452 Z" fill="url(#armorV)" stroke="#120a1f" stroke-width="2"/>
+<path d="M452 520 L444 600 L470 590 L520 596 L548 560 L516 520 Z" fill="#251433" stroke="#150d22" stroke-width="2"/>
+<path d="M470 540 L470 588 M492 540 L492 590 M514 540 L516 584" stroke="#3a2356" stroke-width="6"/>
+<path d="M470 540 L470 588 M492 540 L492 590" stroke="#a855f7" stroke-width="1.4" opacity="0.55"/>
+
+<path d="M250 372 L180 392 L162 452 L182 524 L226 524 L236 452 Z" fill="url(#armorV)" stroke="#120a1f" stroke-width="2"/>
+<g stroke="#5b21b6" stroke-width="2.5">
+<circle cx="204" cy="470" r="22" fill="#0c0913"/>
+<circle cx="204" cy="470" r="11" fill="none" stroke="#a855f7"/>
+<path d="M204 492 L204 700" stroke-width="14" stroke-linecap="round"/>
+<path d="M150 648 L258 648" stroke-width="13" stroke-linecap="round"/>
+<path d="M204 700 C150 700 130 660 132 624 C150 664 176 678 204 678 C232 678 258 664 276 624 C278 660 258 700 204 700 Z" fill="#0c0913"/>
+<path d="M132 624 L120 612 M276 624 L288 612" stroke-width="9" stroke-linecap="round"/>
+</g>
+<path d="M204 500 L204 690" stroke="#a855f7" stroke-width="2" opacity="0.6"/>
+<circle cx="204" cy="470" r="4" fill="#e9d5ff"/>
+
+<path d="M255 235 L300 246 L380 246 L425 235 L412 270 L268 270 Z" fill="#1a1026" stroke="#120a1f" stroke-width="2"/>
+<path d="M285 150 L300 126 L380 126 L395 150 L412 232 L380 252 L300 252 L268 232 Z" fill="url(#armorV)" stroke="#120a1f" stroke-width="2.5"/>
+<path d="M300 138 L380 138 L392 210 L368 240 L312 240 L288 210 Z" fill="#150d22"/>
+<path d="M340 126 L332 110 L348 110 Z" fill="#2c1a42" stroke="#4a2d6b" stroke-width="1.5"/>
+<path d="M288 158 L392 158 L392 176 L288 176 Z" fill="#0a0612"/>
+<ellipse cx="316" cy="182" rx="26" ry="16" fill="url(#eye)"/>
+<ellipse cx="364" cy="182" rx="26" ry="16" fill="url(#eye)"/>
+<path d="M302 184 L330 178 L330 188 L302 190 Z" fill="#fdf4ff"/>
+<path d="M378 184 L350 178 L350 188 L378 190 Z" fill="#fdf4ff"/>
+<path d="M340 200 L334 230 L346 230 Z" fill="#0a0612"/>
+<path d="M300 252 L312 270 M380 252 L368 270" stroke="#a855f7" stroke-width="1.4" opacity="0.6"/>
+
+<circle cx="250" cy="150" r="6" fill="url(#mist)"/>
+<circle cx="436" cy="138" r="6" fill="url(#mist)"/>
+<circle cx="470" cy="200" r="7" fill="url(#mist)"/>
+<circle cx="208" cy="210" r="6" fill="url(#mist)"/>
+</svg>

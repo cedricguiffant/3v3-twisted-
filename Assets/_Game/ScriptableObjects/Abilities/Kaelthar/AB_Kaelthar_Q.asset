@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb900d403c6a7214da939404218efb32, type: 3}
+  m_Name: AB_Kaelthar_Q
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.Kaelthar.Kaelthar_Q_FrappeDuVide
+  DisplayName: Frappe du Vide
+  Description: 
+  Icon: {fileID: 0}
+  Slot: 1
+  Targeting: 1
+  Range: 6
+  MaxRank: 5
+  CooldownByRank:
+  - 8
+  - 7.5
+  - 7
+  - 6.5
+  - 6
+  ManaCostByRank:
+  - 50
+  - 55
+  - 60
+  - 65
+  - 70
+  CastTime: 0.1
+  CanMoveWhileCasting: 0
+  ConeAngle: 60
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  BaseDamageByRank:
+  - 70
+  - 110
+  - 150
+  - 190
+  - 230
+  ApRatio: 0.6
+  SlowAmount: 0.3
+  SlowDuration: 1.5

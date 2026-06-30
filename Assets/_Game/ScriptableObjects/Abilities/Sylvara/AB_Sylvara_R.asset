@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57b0e32df639efa4fb874bb9a97fe16e, type: 3}
+  m_Name: AB_Sylvara_R
+  m_EditorClassIdentifier: Game::Twisted3v3.Champions.Sylvara.Sylvara_R_ForetPrimordiale
+  DisplayName: "For\xEAt Primordiale"
+  Description: 
+  Icon: {fileID: 0}
+  Slot: 4
+  Targeting: 1
+  Range: 8
+  MaxRank: 3
+  CooldownByRank:
+  - 8
+  - 7.5
+  - 7
+  - 6.5
+  - 6
+  ManaCostByRank:
+  - 50
+  - 55
+  - 60
+  - 65
+  - 70
+  CastTime: 0.1
+  CanMoveWhileCasting: 0
+  ZoneRadius: 6
+  Duration: 5
+  TickInterval: 0.5
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  SlowAmount: 0.35
+  EnemyDamagePerTickByRank:
+  - 30
+  - 45
+  - 60
+  AllyHealPerTickByRank:
+  - 25
+  - 40
+  - 55
+  ApRatio: 0.15
