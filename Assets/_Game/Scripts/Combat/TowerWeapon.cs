@@ -43,7 +43,8 @@ namespace Twisted3v3.Combat
             {
                 if (!_buffer[i].TryGetComponent<IDamageable>(out var d)) continue;
                 if (d.IsDead || d is Structure) continue;                 // pas les bâtiments
-                if (d.Team == _structure.Team || d.Team == Team.None) continue; // ennemis seulement
+                if (d.Team == _structure.Team || d.Team == Team.None
+                    || d.Team == Team.Neutral) continue; // ennemis seulement (pas la jungle neutre)
                 float sq = (d.Transform.position - transform.position).sqrMagnitude;
                 if (sq < bestSq) { bestSq = sq; best = d; }
             }

@@ -30,6 +30,11 @@ namespace Twisted3v3.UI
         /// <summary>Largeur de la barre (bâtiments plus larges).</summary>
         public void SetWidth(float width) => _pixelSize = new Vector2(width, _pixelSize.y);
 
+        private bool _concealed;
+
+        /// <summary>Masque/affiche la barre (dissimulation par la vision / les buissons).</summary>
+        public void SetVisible(bool visible) => _concealed = !visible;
+
         private void Start()
         {
             _health = GetComponent<IHealthInfo>();
@@ -69,9 +74,9 @@ namespace Twisted3v3.UI
         {
             if (_health == null || _root == null) return;
 
-            bool dead = _health.IsDead;
-            if (_root.gameObject.activeSelf == dead) _root.gameObject.SetActive(!dead);
-            if (dead) return;
+            bool hidden = _health.IsDead || _concealed;
+            if (_root.gameObject.activeSelf == hidden) _root.gameObject.SetActive(!hidden);
+            if (hidden) return;
 
             _root.position = transform.position + _offset;
             if (_camera != null) _root.rotation = _camera.transform.rotation; // billboard

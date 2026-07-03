@@ -38,8 +38,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   BaseDamageByRank:
-  - 70
-  - 110
+  - 50
+  - 100
   - 150
   - 190
   - 230

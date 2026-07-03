@@ -20,17 +20,29 @@ namespace Twisted3v3.Combat
         private Champion _champion;
         private KillReward _bounty;
         private Behaviour[] _controlBehaviours; // désactivés pendant la mort
-        private Renderer[] _renderers;
+        private ChampionVisuals _visuals;       // source de vérité des renderers
         private Collider[] _colliders;
         private Vector3 _spawnPosition;
+        private bool _spawnOverridden; // position imposée (ex: fontaine)
 
         public bool IsRespawning { get; private set; }
+
+        /// <summary>
+        /// Impose la position de réapparition (prioritaire sur le _spawnPoint sérialisé).
+        /// Utilisé par le <see cref="FountainSpawner"/> pour respawn = fontaine.
+        /// Fonctionne qu'il soit appelé avant ou après Start.
+        /// </summary>
+        public void SetSpawnPosition(Vector3 position)
+        {
+            _spawnPosition = position;
+            _spawnOverridden = true;
+        }
 
         private void Awake()
         {
             _champion = GetComponent<Champion>();
             _bounty = GetComponent<KillReward>();
-            _renderers = GetComponentsInChildren<Renderer>(true);
+            _visuals = ChampionVisuals.Of(_champion); // ajouté tôt : capture au Start
             _colliders = GetComponentsInChildren<Collider>(true);
 
             // Comportements à couper pendant la mort (input, attaque).
@@ -44,11 +56,22 @@ namespace Twisted3v3.Combat
 
         private void Start()
         {
-            _spawnPosition = _spawnPoint != null ? _spawnPoint.position : transform.position;
+            // Ne pas écraser une position déjà imposée (fontaine) par le _spawnPoint sérialisé.
+            if (!_spawnOverridden)
+                _spawnPosition = _spawnPoint != null ? _spawnPoint.position : transform.position;
         }
 
         private void HandleDeath(Champion champion)
         {
+            // Rafraîchit les caches : le sélecteur de champion peut avoir ajouté/retiré
+            // le PlayerController après notre Awake. Les renderers sont gérés par
+            // ChampionVisuals (état de référence, capsule masquée comprise).
+            _colliders = GetComponentsInChildren<Collider>(true);
+            _controlBehaviours = new Behaviour[]
+            {
+                GetComponent<Player.PlayerController>(), GetComponent<AutoAttack>()
+            };
+
             // Attribution du kill au dernier attaquant (or + XP).
             var killer = _champion.Health.LastDamageSource as Champion;
             KillRewardService.Award(_champion.Health.LastDamageSource, _bounty);
@@ -79,7 +102,9 @@ namespace Twisted3v3.Combat
         private void SetActiveState(bool active)
         {
             foreach (var b in _controlBehaviours) if (b != null) b.enabled = active;
-            foreach (var r in _renderers) if (r != null) r.enabled = active;
+            // Restaure l'état de référence des renderers (et non « tout activer » :
+            // la capsule masquée sous un modèle 3D doit rester masquée au respawn).
+            if (_visuals != null) _visuals.SetVisible(active);
             foreach (var c in _colliders) if (c != null) c.enabled = active;
         }
     }

@@ -35,6 +35,7 @@ namespace Twisted3v3.Combat
             marker.transform.localPosition = new Vector3(0f, 0.04f, 0f);
             var col = marker.GetComponent<Collider>(); if (col != null) Destroy(col);
             marker.GetComponent<Renderer>().material.color = new Color(color.r, color.g, color.b, 0.3f);
+            go.AddComponent<Twisted3v3.VFX.MaterialCleanup>(); // libère la copie de matériau
 
             var z = go.AddComponent<AuraZone>();
             z._owner = owner; z._radius = radius; z._interval = Mathf.Max(0.1f, interval);

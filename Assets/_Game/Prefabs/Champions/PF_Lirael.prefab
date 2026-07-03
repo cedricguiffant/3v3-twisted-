@@ -23,6 +23,8 @@ GameObject:
   - component: {fileID: 4259862960473491778}
   - component: {fileID: 1835397854910621357}
   - component: {fileID: 2357055287514016710}
+  - component: {fileID: 190006042562707036}
+  - component: {fileID: 5675262672935859153}
   m_Layer: 10
   m_Name: PF_Lirael
   m_TagString: Untagged
@@ -101,7 +103,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 7c5a41b2449b04049ba2ed3cb3f475aa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -188,7 +190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::Twisted3v3.Combat.AutoAttack
   _rangeBuffer: 1.5
   _critMultiplier: 1.75
-  _useFixedDamage: 1
+  _useFixedDamage: 0
   _fixedDamage: 100
   _unitMask:
     serializedVersion: 2
@@ -311,3 +313,30 @@ MonoBehaviour:
   _pixelSize: {x: 140, y: 18}
   _fillColor: {r: 0.3, g: 0.85, b: 0.3, a: 1}
   _worldScale: 0.01
+--- !u!114 &190006042562707036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4614518304009784391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf251a8167a577845b2c8ef1688fc8e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::Twisted3v3.Combat.CombatFeedback
+  _flashDuration: 0.12
+  _flashColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &5675262672935859153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4614518304009784391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73ecc94db70c8c54fb81c29dc5fe8630, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::Twisted3v3.VFX.AbilityCastVfx
+  _color: {r: 0.95, g: 0.85, b: 0.45, a: 1}

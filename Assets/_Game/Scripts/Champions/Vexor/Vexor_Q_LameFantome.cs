@@ -3,7 +3,6 @@ using Twisted3v3.Core;
 using Twisted3v3.Combat;
 using Twisted3v3.Abilities;
 using Twisted3v3.Abilities.Effects;
-using Twisted3v3.Combat.StatusEffects;
 using Twisted3v3.Stats;
 
 namespace Twisted3v3.Champions.Vexor
@@ -31,11 +30,8 @@ namespace Twisted3v3.Champions.Vexor
                          + AdRatio * caster.Stats.Value(StatType.AttackDamage);
             Vector3 origin = caster.transform.position + Vector3.up + ctx.AimDirection * 0.6f;
 
-            System.Action<IDamageable> onHit = (victim) =>
-            {
-                if (AbilityUtils.TryGetChampion(victim, out var champ))
-                    champ.Status.Apply(new SlowEffect(SlowAmount, SlowDuration));
-            };
+            // Effet composable : ralentissement à l'impact (cf. AbilityEffects).
+            System.Action<IDamageable> onHit = victim => AbilityEffects.Slow(victim, SlowAmount, SlowDuration);
 
             Projectile.Spawn(caster, origin, ctx.AimDirection, ProjectileSpeed, Range,
                 ProjectileRadius, damage, DamageType.Physical, TargetMask,

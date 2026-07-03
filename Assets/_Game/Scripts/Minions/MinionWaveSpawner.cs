@@ -12,8 +12,8 @@ namespace Twisted3v3.Minions
     {
         [SerializeField] private Team _team = Team.Blue;
         [SerializeField] private int _minionsPerWave = 4;
-        [SerializeField] private float _firstWaveDelay = 6f;
-        [SerializeField] private float _waveInterval = 25f;
+        [SerializeField] private float _firstWaveDelay = 5f;
+        [SerializeField] private float _waveInterval = 12f; // fréquence doublée (ex-25 s)
         [SerializeField] private float _spawnSpacing = 0.7f;
 
         [Header("Stats des sbires")]

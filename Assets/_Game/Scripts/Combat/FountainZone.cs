@@ -20,6 +20,16 @@ namespace Twisted3v3.Combat
 
         private static readonly Collider[] _buffer = new Collider[32];
 
+        /// <summary>Équipe propriétaire de la fontaine (base alliée).</summary>
+        public Team Team => _team;
+
+        /// <summary>Vrai si le point monde est dans le rayon de la fontaine (= « en base »).</summary>
+        public bool IsInside(Vector3 worldPos)
+        {
+            Vector3 d = worldPos - transform.position; d.y = 0f;
+            return d.sqrMagnitude <= _radius * _radius;
+        }
+
         public void Configure(Team team) => _team = team;
 
         private void Update()

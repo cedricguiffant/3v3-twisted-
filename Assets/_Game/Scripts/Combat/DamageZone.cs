@@ -34,6 +34,7 @@ namespace Twisted3v3.Combat
             var col = marker.GetComponent<Collider>(); if (col != null) Destroy(col);
             var rend = marker.GetComponent<Renderer>();
             if (rend != null) rend.material.color = new Color(color.r, color.g, color.b, 0.4f);
+            go.AddComponent<Twisted3v3.VFX.MaterialCleanup>(); // libère la copie de matériau
 
             var zone = go.AddComponent<DamageZone>();
             zone._owner = owner;

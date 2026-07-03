@@ -25,6 +25,7 @@ namespace Twisted3v3.Combat
         private Vector3 _direction;
         private float _traveled;
         private HashSet<IDamageable> _alreadyHit;
+        private Color _color;
 
         private static readonly Collider[] _buffer = new Collider[16];
 
@@ -40,14 +41,19 @@ namespace Twisted3v3.Combat
             visual.transform.localScale = Vector3.one * Mathf.Max(0.2f, radius * 2f);
             var col = visual.GetComponent<Collider>(); if (col != null) Destroy(col);
             visual.GetComponent<Renderer>().material.color = color;
+            go.AddComponent<Twisted3v3.VFX.MaterialCleanup>(); // libère la copie de matériau
 
             var p = go.AddComponent<Projectile>();
             p._owner = owner; p._speed = speed; p._maxRange = maxRange; p._radius = Mathf.Max(0.25f, radius);
             p._damage = damage; p._type = type; p._mask = mask; p._pierce = pierce;
-            p._homing = homing; p._onHit = onHit;
+            p._homing = homing; p._onHit = onHit; p._color = color;
             direction.y = 0f;
             p._direction = direction.sqrMagnitude > 0.001f ? direction.normalized : owner.transform.forward;
             if (pierce) p._alreadyHit = new HashSet<IDamageable>();
+
+            // Esthétique : traînée + halo lumineux + émission (voir SpellVfx) + whoosh.
+            Twisted3v3.VFX.SpellVfx.AddProjectileJuice(go, color, radius);
+            Twisted3v3.Audio.Sfx.Play(Twisted3v3.Audio.SfxId.ProjectileWhoosh, origin, 0.5f);
             return p;
         }
 
@@ -75,6 +81,14 @@ namespace Twisted3v3.Combat
 
                 d.TakeDamage(new DamageInfo(_damage, _type, _owner));
                 _onHit?.Invoke(d);
+                Twisted3v3.VFX.SpellVfx.ImpactBurst(transform.position, _color);
+                // Son d'impact pour les non-champions (les champions le jouent
+                // eux-mêmes via CombatFeedback — évite le double son).
+                if (!(d is Champion))
+                    Twisted3v3.Audio.Sfx.Play(
+                        _type == DamageType.Magical ? Twisted3v3.Audio.SfxId.ImpactMagical
+                                                    : Twisted3v3.Audio.SfxId.ImpactPhysical,
+                        transform.position, 0.55f);
                 if (!_pierce) { Destroy(gameObject); return; }
             }
 

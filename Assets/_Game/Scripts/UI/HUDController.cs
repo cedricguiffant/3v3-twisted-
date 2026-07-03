@@ -14,6 +14,16 @@ namespace Twisted3v3.UI
     {
         [SerializeField] private Champion _champion;
 
+        /// <summary>Rebranche le HUD sur un autre champion (sélecteur de champion).
+        /// Appelé par le PlayerChampionBinder avant Start, au chargement de scène.</summary>
+        public void Bind(Champion champion)
+        {
+            _champion = champion;
+            if (champion == null) return;
+            _levels = champion.GetComponent<LevelSystem>();
+            _wallet = champion.GetComponent<GoldWallet>();
+        }
+
         private LevelSystem _levels;
         private GoldWallet _wallet;
         private Font _font;

@@ -53,6 +53,9 @@ namespace Twisted3v3.Combat
                 // Effondrement visuel : on masque le bâtiment.
                 foreach (var r in GetComponentsInChildren<Renderer>()) r.enabled = false;
                 foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
+                // Les ruines ne bloquent plus le passage (obstacle NavMesh éteint).
+                if (TryGetComponent<UnityEngine.AI.NavMeshObstacle>(out var obstacle))
+                    obstacle.enabled = false;
             }
         }
 

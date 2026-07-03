@@ -20,8 +20,8 @@ namespace Twisted3v3.Combat
         [SerializeField] private float _critMultiplier = 1.75f;
 
         [Header("Dégâts")]
-        [Tooltip("TEMPORAIRE : ignore l'AttackDamage et inflige une valeur fixe.")]
-        [SerializeField] private bool _useFixedDamage = true;
+        [Tooltip("Debug uniquement : ignore l'AttackDamage et inflige une valeur fixe.")]
+        [SerializeField] private bool _useFixedDamage = false;
         [SerializeField] private float _fixedDamage = 100f;
 
         [Header("Acquisition de cible (attaque-déplacement)")]
@@ -41,8 +41,16 @@ namespace Twisted3v3.Combat
         private Champion _champion;
         private IDamageable _target;
         private float _cooldown;
+        private float _cooldownDuration = 1f; // durée de la dernière recharge (kiting)
 
         public IDamageable Target => _target;
+
+        /// <summary>
+        /// Kiting : quand actif, le champion recule brièvement après chaque tir puis
+        /// se replace pour frapper (« orbe-walk »). Réservé aux duels contre un
+        /// champion. Piloté par l'IA (rôles à distance) ou une option joueur.
+        /// </summary>
+        public bool Kite { get; set; }
 
         /// <summary>Déclenché à chaque attaque effectuée (passifs : stacks, etc.).</summary>
         public event Action OnAttack;
@@ -112,17 +120,30 @@ namespace Twisted3v3.Combat
                 return;
             }
 
-            // À portée : on s'arrête, on fait face et on frappe à la cadence.
-            _champion.Motor.Stop();
+            // À portée : on fait face à la cible.
             if (toTarget.sqrMagnitude > 0.001f) transform.forward = toTarget.normalized;
 
-            if (_cooldown <= 0f) PerformAttack();
+            if (_cooldown <= 0f) { PerformAttack(); return; }
+
+            // Kiting : recule pendant la première moitié de la recharge (contre un champion),
+            // puis se replace pour tirer. Sinon, on tient position.
+            bool early = _cooldownDuration > 0f && _cooldown > _cooldownDuration * 0.5f;
+            if (Kite && early && _target is Champion)
+            {
+                Vector3 away = transform.position - _target.Transform.position; away.y = 0f;
+                if (away.sqrMagnitude > 0.001f)
+                    _champion.Motor.MoveTo(transform.position + away.normalized * 2.5f);
+            }
+            else
+            {
+                _champion.Motor.Stop();
+            }
         }
 
         private void PerformAttack()
         {
             float attackSpeed = Mathf.Max(0.1f, _champion.Stats.Value(StatType.AttackSpeed));
-            _cooldown = 1f / attackSpeed;
+            _cooldown = _cooldownDuration = 1f / attackSpeed;
 
             float damage = _useFixedDamage ? _fixedDamage : _champion.Stats.Value(StatType.AttackDamage);
             bool isCrit = UnityEngine.Random.value < _champion.Stats.Value(StatType.CritChance);
@@ -142,6 +163,10 @@ namespace Twisted3v3.Combat
             {
                 _target.TakeDamage(new DamageInfo(damage, DamageType.Physical, _champion,
                                                   isCrit, canLifesteal: true));
+                // Son de coup pour les non-champions (les champions le jouent via CombatFeedback).
+                if (!(_target is Champion))
+                    Twisted3v3.Audio.Sfx.Play(Twisted3v3.Audio.SfxId.ImpactPhysical,
+                        _target.Transform.position, 0.5f);
             }
 
             // Vol de vie sur l'attaque.

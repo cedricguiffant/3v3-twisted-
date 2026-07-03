@@ -18,6 +18,11 @@ namespace Twisted3v3.UI
     public sealed class AbilityBarUI : MonoBehaviour
     {
         [SerializeField] private Champion _champion;
+
+        /// <summary>Rebranche la barre sur un autre champion (sélecteur de champion).
+        /// Appelé par le PlayerChampionBinder avant Start, au chargement de scène.</summary>
+        public void Bind(Champion champion) => _champion = champion;
+
         [SerializeField] private Vector2 _slotSize = new(96f, 96f);
         [SerializeField] private float _gap = 10f;
         [SerializeField] private float _bottomMargin = 28f;

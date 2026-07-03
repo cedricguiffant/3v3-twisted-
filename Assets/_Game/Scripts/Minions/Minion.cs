@@ -20,6 +20,7 @@ namespace Twisted3v3.Minions
 
         private Vector3[] _path;
         private int _waypoint;
+        private Vector3 _pathJitter; // décalage latéral propre au sbire (colonne fluide)
         private NavMeshAgent _agent;
         private IDamageable _target;
         private object _lastDamageSource;
@@ -42,6 +43,9 @@ namespace Twisted3v3.Minions
             _path = path;
             _maxHealth = maxHealth; _health = maxHealth; _damage = damage;
             _enemyMask = enemyMask;
+            // Chaque sbire vise un point légèrement décalé du waypoint : la vague
+            // s'étale en colonne au lieu de se compacter sur un point unique.
+            _pathJitter = new Vector3(Random.Range(-1.6f, 1.6f), 0f, Random.Range(-1.2f, 1.2f));
 
             _agent = GetComponent<NavMeshAgent>();
             _agent.speed = moveSpeed; _agent.radius = 0.35f; _agent.height = 1.6f;
@@ -57,6 +61,7 @@ namespace Twisted3v3.Minions
             var bar = gameObject.AddComponent<Twisted3v3.UI.WorldHealthBar>();
             bar.SetColor(color); bar.SetOffsetY(1.4f); bar.SetWidth(80f);
             var rend = GetComponent<Renderer>(); if (rend != null) rend.material.color = color;
+            gameObject.AddComponent<Twisted3v3.VFX.MaterialCleanup>(); // libère la copie de matériau
         }
 
         public void TakeDamage(in DamageInfo info)
@@ -75,9 +80,10 @@ namespace Twisted3v3.Minions
             if (IsDead || _agent == null || !_agent.isOnNavMesh) return;
             if (_cooldown > 0f) _cooldown -= Time.deltaTime;
 
-            // Cible courante encore valide ?
-            if (_target != null && (_target.IsDead ||
-                (_target.Transform.position - transform.position).sqrMagnitude > _aggroRange * _aggroRange))
+            // Cible courante encore valide ? (morte, hors d'aggro, ou devenue invulnérable)
+            if (_target != null && (_target.IsDead
+                || (_target is Structure ts && ts.IsInvulnerable)
+                || (_target.Transform.position - transform.position).sqrMagnitude > _aggroRange * _aggroRange))
                 _target = null;
             if (_target == null) _target = FindEnemy();
 
@@ -87,7 +93,16 @@ namespace Twisted3v3.Minions
 
         private void FightTarget()
         {
-            float dist = Vector3.Distance(transform.position, _target.Transform.position);
+            // En combat : on s'arrête à portée de frappe (pas en marche de lane).
+            _agent.stoppingDistance = _attackRange * 0.8f;
+
+            // Distance au point le plus proche du collider : indispensable pour les
+            // gros bâtiments (le centre d'un Nexus est hors de portée de frappe).
+            Vector3 targetPoint = _target.Transform.position;
+            if (_target.Transform.TryGetComponent<Collider>(out var col))
+                targetPoint = col.ClosestPoint(transform.position);
+
+            float dist = Vector3.Distance(transform.position, targetPoint);
             if (dist > _attackRange)
             {
                 _agent.isStopped = false;
@@ -107,28 +122,45 @@ namespace Twisted3v3.Minions
         private void Advance()
         {
             _agent.isStopped = false;
+            // En marche : pas d'arrêt anticipé (un stoppingDistance > rayon de passage
+            // figeait la colonne : l'agent s'arrêtait à 1.6 u d'un waypoint validé à 1.5 u).
+            _agent.stoppingDistance = 0f;
             if (_path == null || _waypoint >= _path.Length) return;
 
-            _agent.SetDestination(_path[_waypoint]);
-            if ((transform.position - _path[_waypoint]).sqrMagnitude < 2.25f)
+            Vector3 waypoint = _path[_waypoint] + _pathJitter;
+            _agent.SetDestination(waypoint);
+            // Rayon de passage large (3.5 u) : la vague glisse d'un waypoint au suivant
+            // sans que chacun doive atteindre le point exact (fin des embouteillages).
+            if ((transform.position - waypoint).sqrMagnitude < 12.25f)
                 _waypoint++;
         }
 
+        /// <summary>
+        /// Meilleure cible dans le rayon d'aggro, par priorité de lane : sbires ennemis
+        /// d'abord, puis bâtiments attaquables (la tour tombe avant le Nexus grâce à
+        /// son invulnérabilité), puis champions. Ignore la jungle neutre.
+        /// </summary>
         private IDamageable FindEnemy()
         {
             int count = Physics.OverlapSphereNonAlloc(transform.position, _aggroRange, _buffer, _enemyMask);
-            IDamageable best = null;
-            float bestSq = float.MaxValue;
+            IDamageable minion = null, structure = null, champion = null;
+            float minionSq = float.MaxValue, structSq = float.MaxValue, champSq = float.MaxValue;
+
             for (int i = 0; i < count; i++)
             {
                 if (!_buffer[i].TryGetComponent<IDamageable>(out var d)) continue;
                 if (d.IsDead) continue;
                 // Ennemis Bleu/Rouge uniquement (on ignore la jungle neutre).
                 if (d.Team == _team || (d.Team != Team.Blue && d.Team != Team.Red)) continue;
+                // Nexus protégé par sa tour : inattaquable, on ne s'y bloque pas.
+                if (d is Structure s && s.IsInvulnerable) continue;
+
                 float sq = (d.Transform.position - transform.position).sqrMagnitude;
-                if (sq < bestSq) { bestSq = sq; best = d; }
+                if (d is Minion) { if (sq < minionSq) { minionSq = sq; minion = d; } }
+                else if (d is Structure) { if (sq < structSq) { structSq = sq; structure = d; } }
+                else if (sq < champSq) { champSq = sq; champion = d; }
             }
-            return best;
+            return minion ?? structure ?? champion;
         }
 
         private void Die()

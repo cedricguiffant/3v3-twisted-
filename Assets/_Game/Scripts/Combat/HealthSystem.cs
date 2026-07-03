@@ -125,6 +125,14 @@ namespace Twisted3v3.Combat
             }
         }
 
+        /// <summary>Ramène les PV courants sous le maximum (ex: revente d'un item de PV).</summary>
+        public void ClampToMax()
+        {
+            if (CurrentHealth <= MaxHealth) return;
+            CurrentHealth = MaxHealth;
+            OnHealthChanged?.Invoke(CurrentHealth);
+        }
+
         /// <summary>Consomme les boucliers (temporisés d'abord) et renvoie les dégâts restants.</summary>
         private float AbsorbWithShields(float damage)
         {

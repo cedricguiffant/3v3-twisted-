@@ -54,6 +54,7 @@ namespace Twisted3v3.Jungle
                 go.transform.localScale = Vector3.one * _data.MonsterScale;
                 if (go.TryGetComponent<Renderer>(out var rend))
                     rend.material.color = _data.MonsterColor;
+                go.AddComponent<Twisted3v3.VFX.MaterialCleanup>(); // libère la copie de matériau
 
                 var monster = go.AddComponent<JungleMonster>();
                 monster.Initialize(_data);

@@ -39,13 +39,13 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   ImpactDamageByRank:
-  - 180
-  - 280
+  - 150
+  - 265
   - 380
   AdRatio: 0.9
   ZoneDuration: 4
   ZoneTickInterval: 0.5
   ZoneDamagePerTickByRank:
-  - 25
-  - 40
+  - 20
+  - 38
   - 55

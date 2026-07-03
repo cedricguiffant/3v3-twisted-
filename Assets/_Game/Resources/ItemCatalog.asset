@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efc13d8c75473524f8f8771b3a694496, type: 3}
+  m_Name: ItemCatalog
+  m_EditorClassIdentifier: Game::Twisted3v3.Items.ItemCatalog
+  Items:
+  - {fileID: 11400000, guid: cd4eee1da6c4b4f4f9aae45bd45a30fc, type: 2}
+  - {fileID: 11400000, guid: 67cd528266f965a4c88f5b39972191f0, type: 2}
+  - {fileID: 11400000, guid: 81df75f9c39b8fb438643112bbe26a76, type: 2}
+  - {fileID: 11400000, guid: b039a7a7d02ae2a4381e08883cea38df, type: 2}
+  - {fileID: 11400000, guid: 40f6a31f835cf8541bef42e111c9b3bf, type: 2}
+  - {fileID: 11400000, guid: 2efcb32b0b8912c458c33e721728b208, type: 2}
+  - {fileID: 11400000, guid: 49fbaf48171a2534f8a3d7f00b169bdd, type: 2}
+  - {fileID: 11400000, guid: 9c28faea6784f8c4ab0faed98e06df20, type: 2}
+  - {fileID: 11400000, guid: 6fb0a68633ea36f4289a5b775829c1ab, type: 2}
+  - {fileID: 11400000, guid: 07747bfb80ebca549b2b8b14c97e9cd4, type: 2}
+  - {fileID: 11400000, guid: e0ef07c06d7148b43852c52afa1a22b1, type: 2}
+  - {fileID: 11400000, guid: 4bb90cf565186ab46b143fc01f83405f, type: 2}
+  - {fileID: 11400000, guid: f9e3242798e96a04c9a3f2cde09ade40, type: 2}
+  - {fileID: 11400000, guid: cbe9b1e9208dfde478504c4daaca3ec6, type: 2}

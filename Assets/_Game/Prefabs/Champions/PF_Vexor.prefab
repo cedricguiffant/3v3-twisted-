@@ -22,6 +22,8 @@ GameObject:
   - component: {fileID: 8787671244877673461}
   - component: {fileID: 3382870916374668599}
   - component: {fileID: 148053243097456780}
+  - component: {fileID: 3336372294274096155}
+  - component: {fileID: 7316050295645452860}
   m_Layer: 10
   m_Name: PF_Vexor
   m_TagString: Untagged
@@ -150,7 +152,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::Twisted3v3.Champions.Champion
   _data: {fileID: 11400000, guid: a0bec70873098864ea042cc36b46e8f3, type: 2}
   _team: 1
-  _level: 6
+  _level: 1
 --- !u!195 &2321063799976134062
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -187,7 +189,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game::Twisted3v3.Combat.AutoAttack
   _rangeBuffer: 1.5
   _critMultiplier: 1.75
-  _useFixedDamage: 1
+  _useFixedDamage: 0
   _fixedDamage: 100
   _unitMask:
     serializedVersion: 2
@@ -267,10 +269,12 @@ MonoBehaviour:
   _aggroRange: 18
   _abilityCastRange: 7
   _decisionInterval: 0.6
-  _abilityRank: 3
   _unitMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  _retreatHealth: 0.25
+  _resumeHealth: 0.55
+  _ultHealthThreshold: 0.6
 --- !u!114 &148053243097456780
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,3 +291,30 @@ MonoBehaviour:
   _pixelSize: {x: 140, y: 18}
   _fillColor: {r: 0.55, g: 0.3, b: 0.7, a: 1}
   _worldScale: 0.01
+--- !u!114 &3336372294274096155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373703146278983066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf251a8167a577845b2c8ef1688fc8e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::Twisted3v3.Combat.CombatFeedback
+  _flashDuration: 0.12
+  _flashColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &7316050295645452860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373703146278983066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73ecc94db70c8c54fb81c29dc5fe8630, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Game::Twisted3v3.VFX.AbilityCastVfx
+  _color: {r: 0.5, g: 0.2, b: 0.6, a: 1}

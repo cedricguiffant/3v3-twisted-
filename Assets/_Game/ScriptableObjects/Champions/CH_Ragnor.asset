@@ -37,8 +37,8 @@ MonoBehaviour:
     BaseValue: 8
     PerLevel: 0.6
   - Stat: 6
-    BaseValue: 72
-    PerLevel: 4
+    BaseValue: 62
+    PerLevel: 4.6
   - Stat: 8
     BaseValue: 0.68
     PerLevel: 0
