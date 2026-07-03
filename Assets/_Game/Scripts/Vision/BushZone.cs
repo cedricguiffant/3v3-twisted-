@@ -38,6 +38,7 @@ namespace Twisted3v3.Vision
 
         private void BuildMarker()
         {
+            // Disque discret (lisibilité gameplay de la zone)...
             var marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             marker.name = "BushMarker";
             marker.transform.SetParent(transform, false);
@@ -45,9 +46,26 @@ namespace Twisted3v3.Vision
             marker.transform.localPosition = new Vector3(0f, 0.03f, 0f);
             if (marker.TryGetComponent<Collider>(out var col)) Destroy(col);
             var rend = marker.GetComponent<Renderer>();
-            var mat = new Material(Shader.Find("Sprites/Default")) { color = new Color(0.15f, 0.5f, 0.2f, 0.55f) };
+            var mat = new Material(Shader.Find("Sprites/Default")) { color = new Color(0.12f, 0.38f, 0.16f, 0.3f) };
             rend.material = mat;
             rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            // ...et de vraies HAUTES HERBES (touffes procédurales, déterministes par buisson).
+            var rng = new System.Random(Mathf.RoundToInt(transform.position.x * 73f + transform.position.z * 131f));
+            int tufts = Mathf.RoundToInt(_radius * _radius * 1.4f);
+            for (int i = 0; i < tufts; i++)
+            {
+                float angle = (float)rng.NextDouble() * Mathf.PI * 2f;
+                float dist = Mathf.Sqrt((float)rng.NextDouble()) * _radius * 0.9f;
+                Vector3 pos = transform.position
+                              + new Vector3(Mathf.Cos(angle) * dist, 0f, Mathf.Sin(angle) * dist);
+                pos.y = 0f;
+
+                float height = 1.0f + (float)rng.NextDouble() * 0.6f; // herbe haute (cache un champion)
+                float g = 0.8f + (float)rng.NextDouble() * 0.35f;
+                Twisted3v3.VFX.Grass.CreateTuft(pos, height, new Color(g * 0.9f, g, g * 0.85f),
+                    transform, (float)rng.NextDouble());
+            }
         }
 
         private void OnDrawGizmosSelected()
