@@ -48,6 +48,18 @@ namespace Twisted3v3.Progression
         }
 
         /// <summary>
+        /// (Réseau, client) Applique l'XP et les points de compétence reçus du
+        /// serveur — la progression locale ne tourne pas côté client.
+        /// </summary>
+        public void NetworkSync(float xp, int skillPoints)
+        {
+            bool changed = !Mathf.Approximately(xp, CurrentXp) || skillPoints != SkillPoints;
+            CurrentXp = xp;
+            SkillPoints = skillPoints;
+            if (changed) OnXpChanged?.Invoke(this);
+        }
+
+        /// <summary>
         /// Dépense un point pour monter une capacité d'un rang. L'ultime (R) est
         /// limité par le niveau du champion : rang 1 à 6, rang 2 à 11, rang 3 à 16.
         /// </summary>

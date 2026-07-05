@@ -23,6 +23,12 @@ namespace Twisted3v3.Abilities
         public event Action<AbilitySlot, AbilityInstance> OnAbilityCast;
         public event Action<AbilitySlot, AbilityInstance> OnAbilityFailed;
 
+        /// <summary>
+        /// (Réseau) Cast validé, avec son contexte de visée — relayé par le
+        /// serveur aux clients pour rejouer le visuel des autres champions.
+        /// </summary>
+        public event Action<AbilitySlot, int, Vector3, Vector3, Combat.IDamageable> OnCastNetwork;
+
         public void Initialize(Champion champion, IReadOnlyList<AbilityData> abilities)
         {
             _champion = champion;
@@ -84,7 +90,38 @@ namespace Twisted3v3.Abilities
             inst.Data.Execute(_ctx);
             inst.StartCooldown();
             OnAbilityCast?.Invoke(slot, inst);
+            OnCastNetwork?.Invoke(slot, inst.Rank, _ctx.AimDirection, groundPoint, targetUnit);
             return true;
+        }
+
+        /// <summary>
+        /// (Réseau, client) Rejoue un cast déjà validé par le serveur, sans
+        /// vérification ni coût en mana — pour le visuel des champions distants.
+        /// Aligne d'abord le rang local sur celui du serveur.
+        /// </summary>
+        public void ForceCast(AbilitySlot slot, int rank, Vector3 aimDirection,
+                              Vector3 groundPoint, Combat.IDamageable targetUnit = null)
+        {
+            var inst = GetSlot(slot);
+            if (inst == null) return;
+            NetworkSyncRank(slot, rank);
+            BuildContext(inst, aimDirection, groundPoint, targetUnit);
+            inst.Data.Execute(_ctx);
+            inst.StartCooldown();
+            OnAbilityCast?.Invoke(slot, inst);
+        }
+
+        /// <summary>(Réseau, client) Monte une capacité au rang validé par le serveur.</summary>
+        public void NetworkSyncRank(AbilitySlot slot, int rank)
+        {
+            var inst = GetSlot(slot);
+            if (inst == null) return;
+            while (inst.Rank < rank)
+            {
+                bool wasLearned = inst.IsLearned;
+                if (!inst.TryLevelUp()) break;
+                if (!wasLearned) inst.Data.OnLearned(_champion);
+            }
         }
 
         private void BuildContext(AbilityInstance inst, Vector3 aim, Vector3 ground,

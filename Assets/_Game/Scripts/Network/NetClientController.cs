@@ -1,79 +1,89 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Twisted3v3.Core;
 using Twisted3v3.Champions;
 using Twisted3v3.Combat;
-using Twisted3v3.Progression;
+using Twisted3v3.Player;
 
-namespace Twisted3v3.Player
+namespace Twisted3v3.Net
 {
     /// <summary>
-    /// Traduit l'input du joueur en ordres au <see cref="Champion"/> : déplacement
-    /// clic-droit et lancement des capacités Q/Z/E/R sous le curseur. Aucune logique
-    /// de gameplay ici — il ne fait qu'appeler Motor et AbilitySystem (séparation
-    /// des préoccupations). Remplaçable par une IA sans toucher au reste.
-    ///
-    /// Setup éditeur :
-    ///   - Sol sur un layer "Ground" → renseigner GroundMask.
-    ///   - Unités ciblables (colliders) sur un layer "Units" → renseigner UnitMask.
+    /// Version réseau du <see cref="PlayerController"/> : mêmes contrôles
+    /// (clic droit, attaque-déplacement, Q/Z/E/R, Ctrl+touche pour monter un
+    /// sort), mais chaque ordre est à la fois *prédit localement* (réactivité)
+    /// et *envoyé au serveur* (autorité). La montée de sort passe uniquement
+    /// par le serveur, qui renvoie le rang validé.
     /// </summary>
-    public sealed class PlayerController : MonoBehaviour
+    [RequireComponent(typeof(Champion))]
+    public sealed class NetClientController : MonoBehaviour
     {
-        [Header("Références")]
-        [SerializeField] private Champion _champion;
-        [SerializeField] private Camera _camera;
-
-        [Header("Raycast")]
-        [SerializeField] private LayerMask _groundMask = ~0;
-        [SerializeField] private LayerMask _unitMask = 0;
-        [SerializeField] private float _maxRayDistance = 200f;
-
-        [Header("Touches de capacités (AZERTY : A Z E R)")]
-        [SerializeField] private KeyCode _qKey = KeyCode.A;
-        [SerializeField] private KeyCode _zKey = KeyCode.Z;
-        [SerializeField] private KeyCode _eKey = KeyCode.E;
-        [SerializeField] private KeyCode _rKey = KeyCode.R;
-
-        [Header("Attaque")]
-        [Tooltip("Touche d'attaque-déplacement (style MOBA) : puis clic gauche pour viser.")]
-        [SerializeField] private KeyCode _attackMoveKey = KeyCode.Q;
-
-        [Header("Repli")]
-        [Tooltip("Touche de repli vers la fontaine (canal, annulé si on prend des dégâts).")]
-        [SerializeField] private KeyCode _backKey = KeyCode.B;
-
+        private Champion _champion;
+        private Camera _camera;
         private AutoAttack _autoAttack;
-        private LevelSystem _levels;
         private RecallController _recall;
+        private NetClient _net;
+
+        private LayerMask _groundMask = ~0;
+        private LayerMask _unitMask = 0;
+        private float _maxRayDistance = 200f;
+        // Défauts AZERTY : sorts sur A Z E R, attaque-déplacement sur Q.
+        private KeyCode _qKey = KeyCode.A;
+        private KeyCode _zKey = KeyCode.Z;
+        private KeyCode _eKey = KeyCode.E;
+        private KeyCode _rKey = KeyCode.R;
+        private KeyCode _attackMoveKey = KeyCode.Q;
+        private KeyCode _backKey = KeyCode.B;
+
         private bool _attackMovePending;
+
+        /// <summary>Branche le client réseau et reprend les réglages du PlayerController de la scène.</summary>
+        public void Configure(NetClient net, Dictionary<string, object> settings)
+        {
+            _net = net;
+            if (settings == null)
+            {
+                _groundMask = LayerMask.GetMask("Ground");
+                _unitMask = LayerMask.GetMask("Units");
+                return;
+            }
+            if (settings.TryGetValue("_groundMask", out var g)) _groundMask = (LayerMask)g;
+            if (settings.TryGetValue("_unitMask", out var u)) _unitMask = (LayerMask)u;
+            if (settings.TryGetValue("_maxRayDistance", out var d)) _maxRayDistance = (float)d;
+            if (settings.TryGetValue("_qKey", out var q)) _qKey = (KeyCode)q;
+            if (settings.TryGetValue("_zKey", out var z)) _zKey = (KeyCode)z;
+            if (settings.TryGetValue("_eKey", out var e)) _eKey = (KeyCode)e;
+            if (settings.TryGetValue("_rKey", out var r)) _rKey = (KeyCode)r;
+            if (settings.TryGetValue("_attackMoveKey", out var a)) _attackMoveKey = (KeyCode)a;
+        }
 
         private void Awake()
         {
-            if (_champion == null) _champion = GetComponent<Champion>();
-            if (_camera == null) _camera = Camera.main;
-            _autoAttack = _champion != null ? _champion.GetComponent<AutoAttack>() : null;
-            _levels = _champion != null ? _champion.GetComponent<LevelSystem>() : null;
-            _recall = _champion != null
-                ? _champion.GetComponent<RecallController>() ?? _champion.gameObject.AddComponent<RecallController>()
-                : null;
+            _champion = GetComponent<Champion>();
+            _camera = Camera.main;
+            _autoAttack = GetComponent<AutoAttack>();
+            _recall = GetComponent<RecallController>() ?? gameObject.AddComponent<RecallController>();
         }
 
-        private void OnDisable() => CursorService.ShowAttack(false); // évite un curseur d'attaque collé (mort)
+        private void OnDisable() => CursorService.ShowAttack(false);
 
         private void Update()
         {
-            if (_champion == null || _champion.IsDead) return;
+            if (_champion == null || _champion.IsDead || _net == null) return;
+            if (_camera == null) { _camera = Camera.main; if (_camera == null) return; }
 
             if (_recall != null && _recall.IsChanneling)
             {
-                // Tout ordre du joueur annule le repli en cours (sauf B qui l'annule déjà).
-                if (Input.GetKeyDown(_backKey)) _recall.Cancel();
+                if (Input.GetKeyDown(_backKey)) { _recall.Cancel(); _net.SendRecall(); }
                 else if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)
                          || Input.GetKeyDown(_attackMoveKey) || Input.GetKeyDown(_qKey)
                          || Input.GetKeyDown(_zKey) || Input.GetKeyDown(_eKey) || Input.GetKeyDown(_rKey))
+                {
                     _recall.Cancel();
+                    _net.SendRecall();
+                }
                 return;
             }
-            if (Input.GetKeyDown(_backKey)) { _recall?.Toggle(); return; }
+            if (Input.GetKeyDown(_backKey)) { _recall?.Toggle(); _net.SendRecall(); return; }
 
             bool blockRightClick = HandleAttackMove();
             if (!blockRightClick) HandleRightClick();
@@ -82,7 +92,6 @@ namespace Twisted3v3.Player
             bool leveling = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             if (leveling)
             {
-                // Ctrl + touche = investir un point de compétence (style MOBA).
                 HandleAbilityLeveling(_qKey, AbilitySlot.Q);
                 HandleAbilityLeveling(_zKey, AbilitySlot.Z);
                 HandleAbilityLeveling(_eKey, AbilitySlot.E);
@@ -97,28 +106,23 @@ namespace Twisted3v3.Player
             }
         }
 
-        /// <summary>
-        /// Attaque-déplacement : "A" arme l'ordre (curseur d'attaque), puis le clic
-        /// gauche le valide au point visé. Le clic droit / Échap l'annule.
-        /// Renvoie true si l'input doit empêcher le traitement du clic droit ce frame.
-        /// </summary>
         private bool HandleAttackMove()
         {
             if (Input.GetKeyDown(_attackMoveKey)) _attackMovePending = true;
             if (!_attackMovePending) return false;
 
             if (Input.GetKeyDown(KeyCode.Escape)) { _attackMovePending = false; return false; }
-            if (Input.GetMouseButtonDown(1)) { _attackMovePending = false; return true; } // clic droit = annule
+            if (Input.GetMouseButtonDown(1)) { _attackMovePending = false; return true; }
 
             if (Input.GetMouseButtonDown(0) && RaycastGround(out Vector3 point))
             {
-                if (_autoAttack != null) _autoAttack.AttackMove(point);
+                _autoAttack?.AttackMove(point); // prédiction
+                _net.SendAttackMove(point);
                 _attackMovePending = false;
             }
             return false;
         }
 
-        /// <summary>Curseur d'attaque si attaque-déplacement armée OU survol d'un ennemi.</summary>
         private void UpdateCursor()
         {
             bool showAttack = _attackMovePending
@@ -130,24 +134,25 @@ namespace Twisted3v3.Player
         {
             if (!Input.GetMouseButtonDown(1)) return;
 
-            // Priorité à l'attaque : clic sur un ennemi → on l'attaque.
             if (RaycastUnit(out var unit) && _champion.IsEnemy(unit))
             {
-                if (_autoAttack != null) _autoAttack.SetTarget(unit);
+                _autoAttack?.SetTarget(unit); // prédiction
+                _net.SendAttackTarget(unit);
                 return;
             }
 
-            // Sinon, ordre de déplacement (et on abandonne la cible d'attaque).
             if (RaycastGround(out Vector3 point))
             {
-                if (_autoAttack != null) _autoAttack.ClearTarget();
-                _champion.Motor.MoveTo(point);
+                _autoAttack?.ClearTarget();
+                _champion.Motor.MoveTo(point); // prédiction
+                _net.SendMove(point);
             }
         }
 
         private void HandleAbilityLeveling(KeyCode key, AbilitySlot slot)
         {
-            if (Input.GetKeyDown(key) && _levels != null) _levels.TryLevelAbility(slot);
+            // Autorité serveur : le rang validé revient via EvtAbilityLeveled.
+            if (Input.GetKeyDown(key)) _net.SendLevelAbility(slot);
         }
 
         private void HandleAbility(KeyCode key, AbilitySlot slot)
@@ -155,14 +160,13 @@ namespace Twisted3v3.Player
             if (!Input.GetKeyDown(key)) return;
             if (!RaycastGround(out Vector3 groundPoint)) return;
 
-            // Direction visée = du champion vers le curseur, sur le plan horizontal.
             Vector3 aim = groundPoint - _champion.transform.position;
             aim.y = 0f;
-
-            // Cible unité éventuelle sous le curseur (pour les sorts ciblés).
             IDamageable targetUnit = RaycastUnit(out var unit) ? unit : null;
 
+            // Cast prédit localement (visuel immédiat), validé par le serveur.
             _champion.Abilities.TryCast(slot, aim, groundPoint, targetUnit);
+            _net.SendCast(slot, aim, groundPoint, targetUnit);
         }
 
         private bool RaycastGround(out Vector3 point)

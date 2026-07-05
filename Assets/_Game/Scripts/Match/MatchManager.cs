@@ -28,6 +28,12 @@ namespace Twisted3v3.Match
         public event Action OnScoreChanged;
         public event Action OnMatchEnded;
 
+        /// <summary>
+        /// Vrai côté client multijoueur : score, chrono et fin de partie viennent
+        /// des snapshots serveur — la logique locale est coupée.
+        /// </summary>
+        public bool NetworkDriven { get; set; }
+
         private void Awake()
         {
             Instance = this;
@@ -41,7 +47,7 @@ namespace Twisted3v3.Match
 
         private void Update()
         {
-            if (IsEnded || _matchDuration <= 0f) return;
+            if (NetworkDriven || IsEnded || _matchDuration <= 0f) return;
             Elapsed += Time.deltaTime;
             if (Elapsed >= _matchDuration)
                 End(BlueKills > RedKills ? Team.Blue : RedKills > BlueKills ? Team.Red : Team.None);
@@ -50,7 +56,7 @@ namespace Twisted3v3.Match
         /// <summary>Enregistre un kill de champion pour l'équipe du tueur.</summary>
         public void RegisterKill(Team killerTeam)
         {
-            if (IsEnded) return;
+            if (NetworkDriven || IsEnded) return;
             if (killerTeam == Team.Blue) BlueKills++;
             else if (killerTeam == Team.Red) RedKills++;
             else return;
@@ -64,8 +70,24 @@ namespace Twisted3v3.Match
         /// <summary>Destruction d'un Nexus → victoire immédiate de l'équipe adverse.</summary>
         public void RegisterNexusDestroyed(Team winner)
         {
-            if (IsEnded) return;
+            if (NetworkDriven || IsEnded) return;
             End(winner);
+        }
+
+        /// <summary>Applique le score et le chrono reçus du serveur (client MP).</summary>
+        public void NetworkApply(int blueKills, int redKills, float elapsed)
+        {
+            bool changed = blueKills != BlueKills || redKills != RedKills;
+            BlueKills = blueKills;
+            RedKills = redKills;
+            Elapsed = elapsed;
+            if (changed) OnScoreChanged?.Invoke();
+        }
+
+        /// <summary>Fin de partie décidée par le serveur (client MP).</summary>
+        public void NetworkEnd(Team winner)
+        {
+            if (!IsEnded) End(winner);
         }
 
         private void End(Team winner)

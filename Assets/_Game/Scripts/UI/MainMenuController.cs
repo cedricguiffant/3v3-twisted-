@@ -2,14 +2,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using Twisted3v3.Core;
+using Twisted3v3.Net;
 
 namespace Twisted3v3.UI
 {
     /// <summary>
     /// Menu principal : titre + choix du mode de jeu. Panneau principal
-    /// (COOP VS IA / MULTIJOUEUR / QUITTER) et sous-panneau multijoueur
-    /// (Héberger / Rejoindre + adresse). Le mode choisi est enregistré dans
-    /// <see cref="GameConfig"/> et lu par la scène de match. Auto-construit son Canvas.
+    /// (COOP VS IA / MULTIJOUEUR / QUITTER), sous-panneau multijoueur
+    /// (pseudo + adresse, Héberger / Rejoindre), sélection de champion partagée
+    /// entre les modes, et lobby réseau (liste des joueurs, lancement par
+    /// l'hôte). Le mode choisi est enregistré dans <see cref="GameConfig"/> et
+    /// lu par la scène de match. Auto-construit son Canvas.
     /// </summary>
     public sealed class MainMenuController : MonoBehaviour
     {
@@ -22,8 +25,19 @@ namespace Twisted3v3.UI
         private GameObject _mainPanel;
         private GameObject _mpPanel;
         private GameObject _championPanel;
+        private GameObject _lobbyPanel;
         private InputField _addressField;
+        private InputField _pseudoField;
         private Text _mpStatus;
+        private Text _lobbyPlayersText;
+        private Text _lobbyStatus;
+        private GameObject _lobbyLaunchButton;
+
+        /// <summary>Suite donnée au choix d'un champion (solo, héberger, rejoindre).</summary>
+        private System.Action<string> _onChampionPicked;
+
+        private NetServer _server;
+        private NetClient _client;
 
         /// <summary>Roster de l'écran de sélection : nom (= ChampionData.DisplayName),
         /// couleur signature, rôle affiché, équipe de départ dans Map_3v3.</summary>
@@ -44,6 +58,8 @@ namespace Twisted3v3.UI
             EnsureEventSystem();
             Build();
         }
+
+        private void OnDestroy() => UnhookNetwork(shutdown: false);
 
         private void Build()
         {
@@ -72,9 +88,9 @@ namespace Twisted3v3.UI
 
             _mainPanel = BuildMainPanel(canvas.transform);
             _mpPanel = BuildMultiplayerPanel(canvas.transform);
-            _mpPanel.SetActive(false);
             _championPanel = BuildChampionSelectPanel(canvas.transform);
-            _championPanel.SetActive(false);
+            _lobbyPanel = BuildLobbyPanel(canvas.transform);
+            ShowPanel(_mainPanel);
 
             // Splash du champion (à droite), si un portrait est assigné.
             if (_splashPortrait != null)
@@ -89,14 +105,31 @@ namespace Twisted3v3.UI
             }
         }
 
+        /// <summary>Affiche un seul panneau à la fois (main / mp / champions / lobby).</summary>
+        private void ShowPanel(GameObject panel)
+        {
+            _mainPanel.SetActive(panel == _mainPanel);
+            _mpPanel.SetActive(panel == _mpPanel);
+            _championPanel.SetActive(panel == _championPanel);
+            _lobbyPanel.SetActive(panel == _lobbyPanel);
+        }
+
         // ---------------------------------------------------------- Panneau principal
         private GameObject BuildMainPanel(Transform parent)
         {
             var panel = NewRect("MainPanel", parent);
             SetStretch(panel);
 
-            BuildButton(panel, "COOP VS IA", new Vector2(0f, 20f), () => ShowChampionSelect(true));
-            BuildButton(panel, "MULTIJOUEUR", new Vector2(0f, -80f), () => ShowMultiplayer(true));
+            BuildButton(panel, "COOP VS IA", new Vector2(0f, 20f), () =>
+            {
+                _onChampionPicked = StartCoopVsAI;
+                ShowPanel(_championPanel);
+            });
+            BuildButton(panel, "MULTIJOUEUR", new Vector2(0f, -80f), () =>
+            {
+                if (_mpStatus != null) _mpStatus.text = "";
+                ShowPanel(_mpPanel);
+            });
             BuildButton(panel, "QUITTER", new Vector2(0f, -180f), Quit);
             return panel.gameObject;
         }
@@ -110,12 +143,6 @@ namespace Twisted3v3.UI
         }
 
         // -------------------------------------------------- Sélection de champion
-        private void ShowChampionSelect(bool show)
-        {
-            _mainPanel.SetActive(!show);
-            _championPanel.SetActive(show);
-        }
-
         private GameObject BuildChampionSelectPanel(Transform parent)
         {
             var panel = NewRect("ChampionSelectPanel", parent);
@@ -135,7 +162,11 @@ namespace Twisted3v3.UI
                 BuildChampionCard(panel, Roster[i], pos, new Vector2(cardW, cardH));
             }
 
-            BuildButton(panel, "RETOUR", new Vector2(0f, -290f), () => ShowChampionSelect(false));
+            BuildButton(panel, "RETOUR", new Vector2(0f, -290f), () =>
+            {
+                _onChampionPicked = null;
+                ShowPanel(_mainPanel);
+            });
             return panel.gameObject;
         }
 
@@ -178,7 +209,14 @@ namespace Twisted3v3.UI
             colors.fadeDuration = 0.08f;
             button.colors = colors;
             string captured = champ.Name;
-            button.onClick.AddListener(() => StartCoopVsAI(captured));
+            button.onClick.AddListener(() => OnChampionPicked(captured));
+        }
+
+        private void OnChampionPicked(string championName)
+        {
+            var next = _onChampionPicked ?? StartCoopVsAI;
+            _onChampionPicked = null;
+            next(championName);
         }
 
         // ------------------------------------------------------- Panneau multijoueur
@@ -188,50 +226,209 @@ namespace Twisted3v3.UI
             SetStretch(panel);
 
             var heading = NewRect("MpHeading", panel);
-            SetRect(heading, Center, Center, Center, new Vector2(0f, 40f), new Vector2(700f, 40f));
+            SetRect(heading, Center, Center, Center, new Vector2(0f, 90f), new Vector2(700f, 40f));
             AddText(heading.gameObject, "MULTIJOUEUR", 34, TextAnchor.MiddleCenter, new Color(0.8f, 0.82f, 0.9f));
 
-            BuildButton(panel, "HÉBERGER", new Vector2(-190f, -40f), StartHost);
-            BuildButton(panel, "REJOINDRE", new Vector2(190f, -40f), StartClient);
+            // Pseudo
+            var pseudoRect = NewRect("PseudoField", panel);
+            SetRect(pseudoRect, Center, Center, Center, new Vector2(0f, 30f), new Vector2(520f, 56f));
+            _pseudoField = BuildInputField(pseudoRect, GameConfig.PlayerName, "Votre pseudo…");
 
-            // Champ d'adresse IP
+            BuildButton(panel, "HÉBERGER", new Vector2(-190f, -60f), HostFlow);
+            BuildButton(panel, "REJOINDRE", new Vector2(190f, -60f), JoinFlow);
+
+            // Champ d'adresse IP de l'hôte (port optionnel : « ip:port »)
             var fieldRect = NewRect("AddressField", panel);
-            SetRect(fieldRect, Center, Center, Center, new Vector2(0f, -130f), new Vector2(520f, 56f));
+            SetRect(fieldRect, Center, Center, Center, new Vector2(0f, -150f), new Vector2(520f, 56f));
             _addressField = BuildInputField(fieldRect, GameConfig.JoinAddress, "Adresse IP de l'hôte…");
 
-            _mpStatus = NewText(panel, new Vector2(0f, -195f), new Vector2(760f, 34f), 22,
+            _mpStatus = NewText(panel, new Vector2(0f, -215f), new Vector2(900f, 34f), 22,
                                 TextAnchor.MiddleCenter, new Color(0.85f, 0.7f, 0.4f));
             _mpStatus.text = "";
 
-            BuildButton(panel, "RETOUR", new Vector2(0f, -270f), () => ShowMultiplayer(false));
+            BuildButton(panel, "RETOUR", new Vector2(0f, -290f), () => ShowPanel(_mainPanel));
             return panel.gameObject;
         }
 
-        private void ShowMultiplayer(bool show)
+        private void ApplyIdentity()
         {
-            _mainPanel.SetActive(!show);
-            _mpPanel.SetActive(show);
-            if (show && _mpStatus != null) _mpStatus.text = "";
+            if (_pseudoField != null && !string.IsNullOrWhiteSpace(_pseudoField.text))
+                GameConfig.PlayerName = _pseudoField.text.Trim();
+            if (_addressField != null && !string.IsNullOrWhiteSpace(_addressField.text))
+                GameConfig.JoinAddress = _addressField.text.Trim();
         }
 
-        private void StartHost()
+        private void HostFlow()
+        {
+            ApplyIdentity();
+            _onChampionPicked = StartHostWith;
+            ShowPanel(_championPanel);
+        }
+
+        private void JoinFlow()
+        {
+            ApplyIdentity();
+            if (string.IsNullOrWhiteSpace(GameConfig.JoinAddress))
+            {
+                _mpStatus.text = "Entrez l'adresse IP de l'hôte.";
+                return;
+            }
+            _onChampionPicked = StartJoinWith;
+            ShowPanel(_championPanel);
+        }
+
+        private void StartHostWith(string championName)
         {
             GameConfig.Mode = GameMode.Multiplayer;
             GameConfig.Role = NetRole.Host;
-            // NOTE : la couche netcode (NGO + refactor autoritaire serveur) reste à
-            // intégrer. En attendant, l'hôte lance la partie en local (prototype).
-            _mpStatus.text = "Hébergement local (prototype) — lancement…";
-            ScreenFader.Instance.FadeAndLoad(_gameScene);
+            GameConfig.SelectedChampion = championName;
+
+            try
+            {
+                _server = NetRunner.Ensure().StartServer(GameConfig.Port);
+            }
+            catch (System.Exception e)
+            {
+                _mpStatus.text = $"Impossible d'héberger : {e.Message}";
+                ShowPanel(_mpPanel);
+                return;
+            }
+
+            _server.LobbyChanged += RefreshLobby;
+            _lobbyLaunchButton.SetActive(true);
+            _lobbyStatus.text = $"En attente de joueurs — port {GameConfig.Port}. " +
+                                "Vous pouvez lancer seul (les champions libres restent des bots).";
+            ShowPanel(_lobbyPanel);
+            RefreshLobby();
         }
 
-        private void StartClient()
+        private void StartJoinWith(string championName)
         {
             GameConfig.Mode = GameMode.Multiplayer;
             GameConfig.Role = NetRole.Client;
-            if (_addressField != null && !string.IsNullOrWhiteSpace(_addressField.text))
-                GameConfig.JoinAddress = _addressField.text.Trim();
-            // La connexion réseau réelle nécessite la couche netcode (à venir).
-            _mpStatus.text = $"Connexion à {GameConfig.JoinAddress} — réseau non encore branché (NGO requis).";
+            GameConfig.SelectedChampion = championName;
+
+            ParseAddress(GameConfig.JoinAddress, out string host, out int port);
+            _client = NetRunner.Ensure().StartClient(host, port);
+            _client.LobbyChanged += RefreshLobby;
+            _client.Disconnected += OnClientDisconnected;
+            _client.MatchStartRequested += LaunchMatchAsClient;
+
+            _lobbyLaunchButton.SetActive(false);
+            _lobbyStatus.text = $"Connexion à {host}:{port}…";
+            ShowPanel(_lobbyPanel);
+            RefreshLobby();
+        }
+
+        private static void ParseAddress(string address, out string host, out int port)
+        {
+            host = address;
+            port = GameConfig.Port;
+            int sep = address.LastIndexOf(':');
+            if (sep > 0 && int.TryParse(address.Substring(sep + 1), out int parsed))
+            {
+                host = address.Substring(0, sep);
+                port = parsed;
+            }
+        }
+
+        // ------------------------------------------------------------------ Lobby
+        private GameObject BuildLobbyPanel(Transform parent)
+        {
+            var panel = NewRect("LobbyPanel", parent);
+            SetStretch(panel);
+
+            var heading = NewRect("LobbyHeading", panel);
+            SetRect(heading, Center, Center, Center, new Vector2(0f, 190f), new Vector2(700f, 44f));
+            AddText(heading.gameObject, "LOBBY", 38, TextAnchor.MiddleCenter, new Color(0.85f, 0.75f, 0.35f));
+
+            _lobbyPlayersText = NewText(panel, new Vector2(0f, 20f), new Vector2(760f, 280f), 26,
+                                        TextAnchor.UpperCenter, new Color(0.85f, 0.87f, 0.95f));
+            _lobbyPlayersText.text = "";
+
+            _lobbyStatus = NewText(panel, new Vector2(0f, -160f), new Vector2(980f, 60f), 20,
+                                   TextAnchor.MiddleCenter, new Color(0.85f, 0.7f, 0.4f));
+            _lobbyStatus.text = "";
+
+            var launchHolder = NewRect("LaunchHolder", panel);
+            SetStretch(launchHolder);
+            BuildButton(launchHolder, "LANCER LA PARTIE", new Vector2(0f, -230f), LaunchMatchAsHost);
+            _lobbyLaunchButton = launchHolder.gameObject;
+
+            BuildButton(panel, "RETOUR", new Vector2(0f, -330f), LeaveLobby);
+            return panel.gameObject;
+        }
+
+        private void RefreshLobby()
+        {
+            if (_lobbyPlayersText == null) return;
+
+            var sb = new System.Text.StringBuilder();
+            if (_server != null)
+            {
+                foreach (var p in _server.BuildLobby())
+                    sb.AppendLine($"{p.pseudo} — {p.champion}{(p.isHost ? "  (hôte)" : "")}");
+            }
+            else if (_client != null)
+            {
+                if (_client.Lobby.Count == 0 && _client.PlayerId < 0)
+                {
+                    sb.AppendLine("Connexion…");
+                }
+                else
+                {
+                    foreach (var p in _client.Lobby)
+                        sb.AppendLine($"{p.pseudo} — {p.champion}{(p.isHost ? "  (hôte)" : "")}");
+                    _lobbyStatus.text = "En attente du lancement par l'hôte…";
+                }
+            }
+            _lobbyPlayersText.text = sb.ToString();
+        }
+
+        private void LaunchMatchAsHost()
+        {
+            if (_server == null) return;
+            _server.BroadcastStartMatch();
+            UnhookNetwork(shutdown: false); // le NetRunner survit au changement de scène
+            ScreenFader.Instance.FadeAndLoad(_gameScene);
+        }
+
+        private void LaunchMatchAsClient()
+        {
+            UnhookNetwork(shutdown: false);
+            ScreenFader.Instance.FadeAndLoad(_gameScene);
+        }
+
+        private void OnClientDisconnected(string reason)
+        {
+            UnhookNetwork();
+            _mpStatus.text = reason;
+            ShowPanel(_mpPanel);
+        }
+
+        private void LeaveLobby()
+        {
+            UnhookNetwork();
+            ShowPanel(_mpPanel);
+        }
+
+        /// <summary>Détache les événements réseau du menu (et coupe le réseau si demandé).</summary>
+        private void UnhookNetwork(bool shutdown = true)
+        {
+            if (_server != null)
+            {
+                _server.LobbyChanged -= RefreshLobby;
+                _server = null;
+                if (shutdown) NetRunner.Instance?.Shutdown();
+            }
+            if (_client != null)
+            {
+                _client.LobbyChanged -= RefreshLobby;
+                _client.Disconnected -= OnClientDisconnected;
+                _client.MatchStartRequested -= LaunchMatchAsClient;
+                _client = null;
+                if (shutdown) NetRunner.Instance?.Shutdown();
+            }
         }
 
         private void Quit()

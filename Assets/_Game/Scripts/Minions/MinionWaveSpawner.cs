@@ -28,6 +28,17 @@ namespace Twisted3v3.Minions
         private Vector3[] _path;
         private float _timer;
 
+        /// <summary>Équipe de cette vague (pour cibler les spawners lors d'une capture d'objectif).</summary>
+        public Team Team => _team;
+
+        /// <summary>
+        /// Multiplicateur du nombre de sbires par vague, piloté par l'Autel des Âmes :
+        /// l'équipe qui le contrôle voit ses vagues doublées tant qu'elle le tient.
+        /// </summary>
+        public int WaveMultiplier { get; private set; } = 1;
+
+        public void SetWaveMultiplier(int multiplier) => WaveMultiplier = Mathf.Max(1, multiplier);
+
         private void Start()
         {
             int n = transform.childCount;
@@ -48,7 +59,8 @@ namespace Twisted3v3.Minions
 
         private IEnumerator SpawnWave()
         {
-            for (int i = 0; i < _minionsPerWave; i++)
+            int count = _minionsPerWave * WaveMultiplier;
+            for (int i = 0; i < count; i++)
             {
                 SpawnMinion();
                 yield return new WaitForSeconds(_spawnSpacing);

@@ -34,6 +34,22 @@ namespace Twisted3v3.Champions
         public int Level => _level;
         public float CurrentMana { get; private set; }
 
+        private bool _networkDriven;
+
+        /// <summary>
+        /// Vrai côté client multijoueur : PV/mana viennent des snapshots serveur
+        /// (pas de régénération ni de dégâts locaux).
+        /// </summary>
+        public bool NetworkDriven
+        {
+            get => _networkDriven;
+            set
+            {
+                _networkDriven = value;
+                if (Health != null) Health.NetworkDriven = value;
+            }
+        }
+
         // --- CC flags (pilotés par un futur StatusEffectController) ---
         public bool IsDead => Health?.IsDead ?? false;
         public bool IsSilenced { get; set; }
@@ -100,8 +116,17 @@ namespace Twisted3v3.Champions
         private void Update()
         {
             if (Health == null || IsDead) return; // pas encore Setup (data manquante)
+            if (_networkDriven) return;           // vitals pilotés par les snapshots
             Health.Tick(Time.deltaTime);
             RegenMana(Time.deltaTime);
+        }
+
+        /// <summary>Applique les PV/mana reçus du serveur (client multijoueur).</summary>
+        public void NetworkSetVitals(float health, float mana)
+        {
+            Health?.NetworkSet(health);
+            float maxMana = Stats != null ? Stats.Value(StatType.MaxMana) : mana;
+            CurrentMana = Mathf.Clamp(mana, 0f, maxMana);
         }
 
         // --- Ressource mana ---
