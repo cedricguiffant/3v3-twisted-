@@ -40,6 +40,10 @@ namespace Twisted3v3.Player
 
         private static void Apply()
         {
+            // Multijoueur client : les champions sont pilotés par la couche réseau
+            // (NetClient), pas par un PlayerController local.
+            if (GameConfig.IsMultiplayer && GameConfig.Role == NetRole.Client) return;
+
             string wanted = GameConfig.SelectedChampion;
             if (string.IsNullOrWhiteSpace(wanted)) return;
 

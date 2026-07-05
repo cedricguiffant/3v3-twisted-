@@ -106,6 +106,28 @@ namespace Twisted3v3.Items
             return true;
         }
 
+        /// <summary>
+        /// (Réseau, client) Équipe un item validé par le serveur, sans débiter
+        /// l'or — le solde arrive séparément dans le même événement.
+        /// </summary>
+        public void NetworkBuy(ItemData item)
+        {
+            if (item == null || IsFull) return;
+            _items.Add(item);
+            Equip(item);
+            OnChanged?.Invoke();
+        }
+
+        /// <summary>(Réseau, client) Retire un item vendu, validé par le serveur.</summary>
+        public void NetworkSellAt(int index)
+        {
+            if (index < 0 || index >= _items.Count) return;
+            var item = _items[index];
+            _items.RemoveAt(index);
+            Unequip(item);
+            OnChanged?.Invoke();
+        }
+
         // --- Équipement : applique/retire les stats en préservant les PV/mana courants ---
         private void Equip(ItemData item)
         {

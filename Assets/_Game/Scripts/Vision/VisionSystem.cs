@@ -46,6 +46,15 @@ namespace Twisted3v3.Vision
             if (pc != null && pc.TryGetComponent<Champion>(out var c)) _viewerTeam = c.Team;
         }
 
+        /// <summary>
+        /// Impose le point de vue (multijoueur : le champion local n'a pas de
+        /// PlayerController, c'est la couche réseau qui nous branche).
+        /// </summary>
+        public void SetViewer(Champion champion)
+        {
+            if (champion != null) _viewerTeam = champion.Team;
+        }
+
         private void Update()
         {
             _timer -= Time.deltaTime;

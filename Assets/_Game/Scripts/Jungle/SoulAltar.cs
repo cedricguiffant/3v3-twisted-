@@ -1,13 +1,16 @@
 using UnityEngine;
 using Twisted3v3.Core;
 using Twisted3v3.Champions;
+using Twisted3v3.Minions;
 
 namespace Twisted3v3.Jungle
 {
     /// <summary>
     /// Autel des Âmes — objectif majeur central. Une équipe capture en restant dans
     /// le rayon ; la capture est gelée si les deux équipes sont présentes (contestée).
-    /// À la prise, un buff d'équipe (issu du <see cref="JungleCampData"/>) est accordé.
+    /// À la prise, un buff d'équipe (issu du <see cref="JungleCampData"/>) est accordé,
+    /// et les vagues de sbires de l'équipe capturante sont doublées tant qu'elle
+    /// contrôle l'autel.
     /// </summary>
     public sealed class SoulAltar : MonoBehaviour
     {
@@ -78,6 +81,11 @@ namespace Twisted3v3.Jungle
             _progress = 0f;
 
             TeamBuffRunner.Instance.ApplyToTeam(team, _data.ClearBuffs, _data.BuffDuration);
+
+            // Vagues de sbires doublées pour l'équipe qui contrôle l'autel ;
+            // l'ancienne équipe (s'il y en a une) repasse à la normale.
+            foreach (var spawner in Object.FindObjectsByType<MinionWaveSpawner>(FindObjectsSortMode.None))
+                spawner.SetWaveMultiplier(spawner.Team == team ? 2 : 1);
 
             if (_marker != null)
                 _marker.material.color = team == Team.Blue

@@ -17,6 +17,12 @@ namespace Twisted3v3.Economy
 
         public event Action<GoldWallet> OnGoldChanged;
 
+        /// <summary>
+        /// Vrai côté client multijoueur : l'or vient des snapshots serveur —
+        /// le revenu passif local est coupé.
+        /// </summary>
+        public bool NetworkDriven { get; set; }
+
         private float _incomeAccumulator;
 
         private void Start()
@@ -27,7 +33,7 @@ namespace Twisted3v3.Economy
 
         private void Update()
         {
-            if (_passiveIncomePerSecond <= 0f) return;
+            if (NetworkDriven || _passiveIncomePerSecond <= 0f) return;
             _incomeAccumulator += _passiveIncomePerSecond * Time.deltaTime;
             if (_incomeAccumulator >= 1f)
             {
@@ -41,6 +47,14 @@ namespace Twisted3v3.Economy
         {
             if (amount == 0) return;
             Gold = Mathf.Max(0, Gold + amount);
+            OnGoldChanged?.Invoke(this);
+        }
+
+        /// <summary>(Réseau, client) Applique l'or validé par le serveur.</summary>
+        public void NetworkSet(int gold)
+        {
+            if (gold == Gold) return;
+            Gold = gold;
             OnGoldChanged?.Invoke(this);
         }
 

@@ -80,7 +80,7 @@ namespace Twisted3v3.UI
             var canvas = BuildCanvas();
 
             var slots = new[] { AbilitySlot.Q, AbilitySlot.Z, AbilitySlot.E, AbilitySlot.R };
-            var keys = new[] { "Q", "Z", "E", "R" };
+            var keys = new[] { "A", "Z", "E", "R" }; // AZERTY
 
             float barWidth = slots.Length * _slotSize.x + (slots.Length - 1) * _gap;
 

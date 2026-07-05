@@ -35,6 +35,35 @@ namespace Twisted3v3.UI
 
         private void Start()
         {
+            // Multijoueur client : le champion local est branché par la couche
+            // réseau une frame après le chargement — on attend qu'il soit prêt.
+            if (Core.GameConfig.IsMultiplayer && Core.GameConfig.Role == Core.NetRole.Client)
+            {
+                StartCoroutine(InitWhenNetworkReady());
+                return;
+            }
+            Init();
+        }
+
+        private System.Collections.IEnumerator InitWhenNetworkReady()
+        {
+            float deadline = Time.unscaledTime + 5f;
+            while (Time.unscaledTime < deadline)
+            {
+                var client = Net.NetRunner.IsClient ? Net.NetRunner.Instance.Client : null;
+                if (client != null && client.OwnChampion != null)
+                {
+                    _champion = client.OwnChampion;
+                    Init();
+                    yield break;
+                }
+                yield return null;
+            }
+            enabled = false;
+        }
+
+        private void Init()
+        {
             if (_champion == null) _champion = ResolvePlayerChampion();
             if (_champion == null) { enabled = false; return; }
 
@@ -43,6 +72,7 @@ namespace Twisted3v3.UI
             _wallet = _champion.GetComponent<GoldWallet>();
 
             if (_catalog == null) _catalog = Resources.Load<ItemCatalog>("ItemCatalog");
+            Net.NetShop.Catalog = _catalog; // items identifiés par index en réseau
 
             _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
                     ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
@@ -113,6 +143,13 @@ namespace Twisted3v3.UI
                 case Inventory.PurchaseError.Full: Deny("Inventaire plein."); return;
                 case Inventory.PurchaseError.NotEnoughGold: Deny("Or insuffisant."); return;
                 case Inventory.PurchaseError.DuplicateUnique: Deny("Un seul exemplaire autorisé."); return;
+            }
+
+            // Client multijoueur : l'achat est validé par le serveur.
+            if (Net.NetShop.InterceptBuy(_champion, item))
+            {
+                Flash($"Achat : {item.DisplayName}…");
+                return;
             }
 
             if (_inventory.TryBuy(item))
@@ -235,6 +272,13 @@ namespace Twisted3v3.UI
         {
             if (index >= _inventory.Items.Count) return;
             var name = _inventory.Items[index].DisplayName;
+
+            // Client multijoueur : la vente est validée par le serveur.
+            if (Net.NetShop.InterceptSell(_champion, index))
+            {
+                Flash($"Vente : {name}…");
+                return;
+            }
             if (_inventory.SellAt(index))
             {
                 Flash($"Vendu : {name}");

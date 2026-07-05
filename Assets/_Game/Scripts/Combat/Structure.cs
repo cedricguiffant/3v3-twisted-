@@ -21,6 +21,12 @@ namespace Twisted3v3.Combat
         /// <summary>Quand vrai, ignore tous les dégâts (ex: Nexus tant qu'une tour tient).</summary>
         public bool IsInvulnerable { get; set; }
 
+        /// <summary>
+        /// Vrai côté client multijoueur : les PV viennent des snapshots serveur —
+        /// les dégâts locaux sont ignorés.
+        /// </summary>
+        public bool NetworkDriven { get; set; }
+
         public Team Team => _team;
         public Transform Transform => transform;
         public bool IsDead => _destroyed;
@@ -43,20 +49,36 @@ namespace Twisted3v3.Combat
 
         public void TakeDamage(in DamageInfo info)
         {
-            if (_destroyed || IsInvulnerable) return;
+            if (_destroyed || IsInvulnerable || NetworkDriven) return;
             _health -= info.Amount;
-            if (_health <= 0f)
-            {
-                _health = 0f;
-                _destroyed = true;
-                OnDestroyed?.Invoke(this);
-                // Effondrement visuel : on masque le bâtiment.
-                foreach (var r in GetComponentsInChildren<Renderer>()) r.enabled = false;
-                foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
-                // Les ruines ne bloquent plus le passage (obstacle NavMesh éteint).
-                if (TryGetComponent<UnityEngine.AI.NavMeshObstacle>(out var obstacle))
-                    obstacle.enabled = false;
-            }
+            if (_health <= 0f) Collapse();
+        }
+
+        /// <summary>(Réseau, client) Applique les PV reçus du serveur.</summary>
+        public void NetworkSetHealth(float health)
+        {
+            if (_destroyed) return;
+            _health = Mathf.Clamp(health, 0f, _maxHealth);
+        }
+
+        /// <summary>(Réseau, client) Destruction décidée par le serveur.</summary>
+        public void NetworkDestroy()
+        {
+            if (_destroyed) return;
+            Collapse();
+        }
+
+        private void Collapse()
+        {
+            _health = 0f;
+            _destroyed = true;
+            OnDestroyed?.Invoke(this);
+            // Effondrement visuel : on masque le bâtiment.
+            foreach (var r in GetComponentsInChildren<Renderer>()) r.enabled = false;
+            foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
+            // Les ruines ne bloquent plus le passage (obstacle NavMesh éteint).
+            if (TryGetComponent<UnityEngine.AI.NavMeshObstacle>(out var obstacle))
+                obstacle.enabled = false;
         }
 
         public void Heal(float amount, object source = null)

@@ -41,6 +41,12 @@ namespace Twisted3v3.Combat
 
         public bool IsDead => CurrentHealth <= 0f;
 
+        /// <summary>
+        /// Vrai côté client multijoueur : les PV viennent des snapshots serveur —
+        /// dégâts, soins et régénération locaux sont ignorés.
+        /// </summary>
+        public bool NetworkDriven { get; set; }
+
         public float MaxHealth => _stats.Value(StatType.MaxHealth);
         public float HealthPercent => MaxHealth > 0f ? CurrentHealth / MaxHealth : 0f;
 
@@ -58,7 +64,7 @@ namespace Twisted3v3.Combat
 
         public void Tick(float deltaTime)
         {
-            if (IsDead) return;
+            if (IsDead || NetworkDriven) return;
 
             // Expiration des boucliers temporisés.
             for (int i = _shields.Count - 1; i >= 0; i--)
@@ -82,7 +88,7 @@ namespace Twisted3v3.Combat
 
         public void TakeDamage(in DamageInfo info)
         {
-            if (IsDead) return;
+            if (IsDead || NetworkDriven) return;
 
             LastDamageSource = info.Source;
             float mitigated = ResolveMitigation(info);
@@ -99,9 +105,21 @@ namespace Twisted3v3.Combat
 
         public void Heal(float amount, object source = null, bool silent = false)
         {
-            if (IsDead || amount <= 0f) return;
+            if (IsDead || NetworkDriven || amount <= 0f) return;
             CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + amount);
             if (!silent) OnHealed?.Invoke(amount);
+            OnHealthChanged?.Invoke(CurrentHealth);
+        }
+
+        /// <summary>
+        /// Applique les PV reçus du serveur (client multijoueur). Ne déclenche
+        /// pas OnDeath : la mort côté client est gérée par la vue réseau.
+        /// </summary>
+        public void NetworkSet(float current)
+        {
+            current = Mathf.Clamp(current, 0f, MaxHealth);
+            if (Mathf.Approximately(current, CurrentHealth)) return;
+            CurrentHealth = current;
             OnHealthChanged?.Invoke(CurrentHealth);
         }
 
